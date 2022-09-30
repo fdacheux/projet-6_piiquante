@@ -8,8 +8,6 @@ const multer = require('../middleware/multer-config');
 const sauceCtrl = require('../controllers/sauce')
 
 
-// modèle chemin : router.post('/', auth,  sauceCtrl.createSauce);
-
 router.post('/', auth, multer, sauceCtrl.createSauce);
 
 router.get('/', auth, sauceCtrl.getAllSauces);
