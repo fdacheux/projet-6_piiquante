@@ -14,4 +14,14 @@ const modelsSauce = mongoose.Schema({
     usersDisliked : { type: Array}
 })
 
+
+
+// modelsSauce.virtual('likes').get(function() {
+//     return this.usersLiked?.length
+// });
+
+// modelsSauce.virtual('dislikes').get(function() {
+//     return this.usersDisliked?.length
+// });
+
 module.exports = mongoose.model('sauce', modelsSauce);

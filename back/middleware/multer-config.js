@@ -1,5 +1,5 @@
 const multer = require('multer');
-var path = require('path');
+const path = require('path');
 
 const MIME_TYPES = {
     'image/jpg' : 'jpg',
@@ -7,18 +7,17 @@ const MIME_TYPES = {
     'image/png' : 'png'
 };
 
-const FILE_VALIDATION_ERROR = 'Only .png, .jpg and .jpeg format allowed!'
+const extensionsAllowed = '.jpg' || '.jpeg' || '.png';
+const mimeTypesAllowed = 'image/png' || 'image/jpg' || 'image/jpeg';
+const FILE_VALIDATION_ERROR = 'Only .png, .jpg and .jpeg format allowed!';
+
 
 const fileFilter = (req, file, cb) => {
     const extension = path.extname(file.originalname).toLowerCase();
     const mimeType = file.mimetype;
     if ( //include
-        extension !== '.jpg' &&
-        extension !== '.jpeg' &&
-        extension !== '.png' &&
-        mimeType !== 'image/png' &&
-        mimeType !== 'image/jpg' &&
-        mimeType !== 'image/jpeg'
+        !extension.includes(extensionsAllowed) &&
+        !mimeType.includes(mimeTypesAllowed)
     ) {
         req.fileValidationError = FILE_VALIDATION_ERROR
         cb(null, false, new Error(FILE_VALIDATION_ERROR));

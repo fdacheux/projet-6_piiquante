@@ -1,30 +1,55 @@
 const bcrypt = require('bcrypt');
-const jsonWebToken = require('jsonwebtoken')
+const jsonWebToken = require('jsonwebtoken');
+const { hashPassword } = require('../helper/user.helper');
 
 const User = require('../models/User');
+const { save } = require('../services/user.service');
 
-exports.signup = (req, res, next) => {
-    bcrypt.hash(req.body.password, 10) // 10 is sufficient for secured passwords without slowing down apps
-        .then(hash => {
-            const user = new User({
+exports.signup = async (req, res, next) => {
+    try {
+        const hash = await bcrypt.hash(req.body.password, 10) // 10 is sufficient for secured passwords without slowing down apps
+        const user = new User({
                 email: req.body.email,
                 password: hash
             })
-            user.save()
-                .then(() => res.status(201).json( {message: "Nouvel utilisateur ajouté"} ))
-                .catch(error => res.status(400).json(error));
-        })
-        .catch(error => res.status(500).json( {error} ));
+            try {
+                await user.save()
+                res.status(201).json( {message: "Nouvel utilisateur ajouté"} )
+            } 
+            catch(error) {
+                res.status(400).json({message : error.message})
+            }
+    }
+    catch(error) {
+        res.status(500).json({message : error.message});
+    }
+
+    // let hash
+
+    // try{
+    //     hash = await hashPassword(req.body.password)
+    // }catch(error){
+    //     res.status(500).json( {error} );
+    // }
+
+    // if(hash){
+    //     try{
+    //         await save(hash)
+    //         res.status(201).json( {message: "Nouvel utilisateur ajouté"} )
+    //     }catch{
+    //         res.status(400).json(error)
+    //     }
+    // }
 };
 
-exports.login = (req, res, next) => {
-    User.findOne({email: req.body.email})
-        .then(user => {
+exports.login = async (req, res, next) => {
+    const user = await User.findOne({email: req.body.email});
+        try {    
             if(user === null){
                 res.status(401).json( {message: "Paire identifiant/mot de passe incorrecte"} );
             } else {
-                bcrypt.compare(req.body.password, user.password)
-                    .then(valid => {
+                const valid = await bcrypt.compare(req.body.password, user.password)
+                    try {
                         if(!valid) {
                             res.status(401).json( {message: "Paire identifiant/mot de passe incorrecte"} )
                         } else {
@@ -37,13 +62,13 @@ exports.login = (req, res, next) => {
                                 )
                             })
                         }
-                    })
-                    .catch(error => {
+                    }
+                    catch(error) {
                         res.status(500).json( { error } )
-                    })
+                    }
             }
-        })
-        .catch(error => {
+        }
+        catch {
             res.status(500).json({error});
-        })
+        }
 };
