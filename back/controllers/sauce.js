@@ -1,5 +1,4 @@
 const Sauce = require('../models/Sauce');
-const fs = require('fs');
 const { getSauce, 
         addLike, 
         addDislike, 
@@ -15,15 +14,17 @@ exports.createSauce = async (req, res, next) => {
     
     if (req.fileValidationError) {
       res.status(415).json({ message: {message:req.fileValidationError}})
+    } else if (!req.file || req.auth.userId) {
+      res.status(400).json( {message : 'Image is missing'} );
     } else {
-      const sauce = new Sauce(
+      const sauce = 
+      new Sauce( 
         toSauce(
           req.body.sauce,
           `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
           req.auth.userId
-        )
-      );
-
+        ))
+    
       try { 
           await saveSauce(sauce);
           res.status(201).json({ message: 'New sauce object successfully saved !'}) 
@@ -39,9 +40,9 @@ exports.getAllSauces = async (req, res, next) => {
   try {
     const sauces = await getSauces();
     res.status(200).json(sauces)
-  }
+  } 
   catch(error) {
-    res.status(400).json( {message : error.message} );
+    res.status(400).json( {message : error.message} ); 
   }
 }
 

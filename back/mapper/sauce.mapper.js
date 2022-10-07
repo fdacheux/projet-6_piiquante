@@ -5,8 +5,8 @@ const toSauce = (sauce, imageUrl, userId) =>{
         delete newSauce._userId;
         return { 
             ...newSauce,
-            userId : userId,
-            imageUrl : imageUrl
+            userId,
+            imageUrl
           }
     }
     else if(imageUrl){

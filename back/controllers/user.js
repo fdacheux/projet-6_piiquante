@@ -1,9 +1,9 @@
 const bcrypt = require('bcrypt');
-const jsonWebToken = require('jsonwebtoken');
-const hashPassword = require('../helper/user.helper');
+const {hashPassword, compareHashedPasswords} = require('../helper/user.helper');
 
 const User = require('../models/User');
-const save = require('../services/user.service');
+const {save, findUser} = require('../services/user.service');
+const sessionIds = require('../mapper/user.mapper')
 
 exports.signup = async (req, res, next) => {
 
@@ -26,32 +26,21 @@ exports.signup = async (req, res, next) => {
 };
 
 exports.login = async (req, res, next) => {
-    const user = await User.findOne({email: req.body.email});
-        try {    
-            if(user === null){
-                res.status(401).json( {message: "Paire identifiant/mot de passe incorrecte"} );
+    try {    
+        const user = await findUser(req.body.email);
+        if(user === null){
+            res.status(401).json( {message: "Paire identifiant/mot de passe incorrecte"} );
+        } else {
+            
+            if(! await compareHashedPasswords(req.body.password, user.password)) {
+                res.status(401).json( {message: "Paire identifiant/mot de passe incorrecte"} )
             } else {
-                const valid = await bcrypt.compare(req.body.password, user.password)
-                    try {
-                        if(!valid) {
-                            res.status(401).json( {message: "Paire identifiant/mot de passe incorrecte"} )
-                        } else {
-                            res.status(200).json({
-                                userId: user._id,
-                                token: jsonWebToken.sign(
-                                        {userId: user._id},
-                                        'RANDOM_TOKEN_SECRET',
-                                        { expiresIn : '24h'}
-                                )
-                            })
-                        }
-                    }
-                    catch(error) {
-                        res.status(500).json( { error } )
-                    }
+                res.status(200).json(sessionIds(user._id))
             }
+
         }
-        catch {
-            res.status(500).json({error});
-        }
+    }
+    catch {
+        res.status(500).json({message : error.message});
+    }
 };

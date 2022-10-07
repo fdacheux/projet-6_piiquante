@@ -6,8 +6,12 @@ const save = async(email, hash)=>{
         password: hash
     })
             
-    return user.save()
-            
+    return user.save()            
 }
 
-module.exports = save;
+const findUser = async (email) => {
+    return User.findOne({email});
+}
+
+
+module.exports = {save, findUser};
