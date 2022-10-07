@@ -8,20 +8,19 @@ const modelsSauce = mongoose.Schema({
     mainPepper: { type: String, required: true},
     imageUrl: { type: String, required: true},
     heat: { type: Number, required: true},
-    likes: { type: Number, default: 0}, 
-    dislikes : { type: Number, default: 0} , 
-    usersLiked : { type: Array },
+    usersLiked : { type: Array},
     usersDisliked : { type: Array}
 })
 
+modelsSauce.set('toObject', { virtuals: true })
+modelsSauce.set('toJSON', { virtuals: true })
 
+modelsSauce.virtual('likes').get(function() {
+    return this.usersLiked?.length
+});
 
-// modelsSauce.virtual('likes').get(function() {
-//     return this.usersLiked?.length
-// });
-
-// modelsSauce.virtual('dislikes').get(function() {
-//     return this.usersDisliked?.length
-// });
+modelsSauce.virtual('dislikes').get(function() {
+    return this.usersDisliked?.length
+});
 
 module.exports = mongoose.model('sauce', modelsSauce);

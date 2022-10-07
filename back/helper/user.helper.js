@@ -1,5 +1,5 @@
-// const bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt');
 
-// const hashPassword = async (password) => bcrypt.hash(password, 10)
+const hashPassword = async (password) => bcrypt.hash(password, 10);
 
-// module.exports = hashPassword;
+module.exports = hashPassword;

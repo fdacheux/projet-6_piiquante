@@ -1,13 +1,13 @@
-// const User = require('../models/User');
+const User = require('../models/User');
 
-// const save = async(hash)=>{
-//     const user = new User({
-//         email: req.body.email,
-//         password: hash
-//     })
+const save = async(email, hash)=>{
+    const user = new User({
+        email,
+        password: hash
+    })
             
-//     return user.save()
+    return user.save()
             
-// }
+}
 
-// module.exports = save;
+module.exports = save;

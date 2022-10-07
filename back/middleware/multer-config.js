@@ -2,9 +2,9 @@ const multer = require('multer');
 const path = require('path');
 
 const MIME_TYPES = {
-    'image/jpg' : 'jpg',
-    'image/jpeg' : 'jpg',
-    'image/png' : 'png'
+    'image/jpg' : '.jpg',
+    'image/jpeg' : '.jpg',
+    'image/png' : '.png'
 };
 
 const extensionsAllowed = '.jpg' || '.jpeg' || '.png';
@@ -16,8 +16,9 @@ const fileFilter = (req, file, cb) => {
     const extension = path.extname(file.originalname).toLowerCase();
     const mimeType = file.mimetype;
     if ( //include
-        !extension.includes(extensionsAllowed) &&
-        !mimeType.includes(mimeTypesAllowed)
+    !Object.keys(MIME_TYPES).includes(mimeType) || !Object.values(MIME_TYPES).includes(extension)
+        // !extension.includes(extensionsAllowed) &&
+        // !mimeType.includes(mimeTypesAllowed)
     ) {
         req.fileValidationError = FILE_VALIDATION_ERROR
         cb(null, false, new Error(FILE_VALIDATION_ERROR));
@@ -34,7 +35,7 @@ const storage = multer.diskStorage({
     filename: (req, file, callback) => {
         const name = file.originalname.split(' ').join('_')
         const extension = MIME_TYPES[file.mimetype];
-        callback(null, name.split('.')[0] + '_' + Date.now() + '.' + extension);
+        callback(null, name.split('.')[0] + '_' + Date.now() +  extension);
     } 
 });
 

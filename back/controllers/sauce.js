@@ -1,6 +1,6 @@
 const Sauce = require('../models/Sauce');
 const fs = require('fs');
-const { addLike, addDislike, removeLikeDislike } = require('../services/sauce.service')
+const { getSauce, addLike, addDislike, removeLikeDislike, saveSauce } = require('../services/sauce.service')
 
 exports.createSauce = async (req, res, next) => {  
     
@@ -17,7 +17,7 @@ exports.createSauce = async (req, res, next) => {
       });
 
       try { 
-          await sauce.save()
+          await saveSauce(sauce);
           res.status(201).json({ message: 'Objet enregistré !'}) 
         }
         catch(error) { 
@@ -85,82 +85,43 @@ exports.modifySauce = (req, res, next) => {
 
 exports.likeSauce = async (req, res, next) => {
   try {
-    const sauce = await Sauce.findOne( { _id: req.params.id } );
     const like = req.body.like;
     const userId = req.auth.userId;
     const sauceId = req.params.id;
-    const usersLiked = sauce.usersLiked;
-    const usersDisliked = sauce.usersDisliked;
-
-    try{
-
-      switch (like){
-        case 1 : 
-          await addLike(userId, sauceId, usersLiked, usersDisliked, res);
-          break;
-        case -1 : 
-          await addDislike(userId, sauceId, usersLiked, usersDisliked, res);
-          break;
-        case 0 : 
-          await removeLikeDislike(userId, sauceId, usersLiked, usersDisliked, res)
-          break;
-        default : 
-          throw new Error({message : 'Unauthorized'});
-      }
-      
+    
+    if(!getSauce(req.params.id)){
+      res.status(404).json( {message : 'sauce not found'} )
     }
-    catch (error){
-      res.status(400).json( {message : error.message} )
+
+    else {  
+      try {
+  
+        switch (like){
+          case 1 : 
+            await addLike(userId, sauceId);
+            res.status(200).json('Like successfully added !')
+            break;
+          case -1 : 
+            await addDislike(userId, sauceId);
+            res.status(200).json('Dislike successfully added !')
+            break;
+          case 0 : 
+            await removeLikeDislike(userId, sauceId)
+            res.status(200).json('Like/dislike successfully removed !')
+            break;
+          default : 
+            throw new Error({message : 'like format not recognized'});
+        }
+        
+      }
+      catch (error){
+        res.status(400).json( {message : error.message} )
+      }
     }
   }
   catch(error) {
-    res.status(404).json( {message : error.message} )
+    res.status(500).json( {message : error.message} )
   }
-  // .then(sauce => { //utiliser longueur tableau pour nombre likes/dislikes (mongoDB $ + => regarder doc mongoDB)
-  //   const hasAlreadyLikedDisliked = (sauce.usersLiked.includes(req.auth.userId) || sauce.usersDisliked.includes(req.auth.userId));
-  //   const updateLikesOrDislikes = (hadLiked) => {
-  //     if (req.body.like === 1 || (req.body.like === 0 && hadLiked)) {
-  //       Sauce.updateOne({ _id: req.params.id }, { likes: sauce.likes, usersLiked: sauce.usersLiked,  _id: req.params.id})
-  //         .then(() => res.status(200).json( {message: 'Like modifié'}))
-  //         .catch(error => res.status(401).json( {error} ))
-  //     } else if (req.body.like === -1 || (req.body.like === 0 && !hadLiked)){
-  //       Sauce.updateOne({ _id: req.params.id }, { dislikes: sauce.dislikes, usersDisliked: sauce.usersDisliked,  _id: req.params.id})
-  //         .then(() => res.status(200).json( {message: 'Dislike modifié'}))
-  //         .catch(error => res.status(401).json( {error} ));
-  //     } else {
-  //       error();
-  //     }
-  //   }
-
-  //   let hadLiked = true;
-  //   if(req.body.like === 1 && !hasAlreadyLikedDisliked){
-  //     sauce.likes += 1;
-  //     sauce.usersLiked.push(req.auth.userId);
-  //   } else if(req.body.like === -1 && !hasAlreadyLikedDisliked){
-  //     sauce.dislikes += 1;
-  //     sauce.usersDisliked.push(req.auth.userId)
-  //   } else if (req.body.like === 0 && hasAlreadyLikedDisliked){
-  //     const removeLike = () => {
-  //       sauce.likes -= 1;
-  //       const userIndex = sauce.usersLiked.findIndex(element => element === req.auth.userId);
-  //       sauce.usersLiked.splice(userIndex, 1);
-  //       return hadLiked
-  //     }
-  //     const removeDislike = () => {
-  //       sauce.dislikes -= 1;
-  //       const userIndex = sauce.usersDisliked.findIndex(element => element === req.auth.userId);
-  //       sauce.usersDisliked.splice(userIndex, 1);
-  //       hadLiked = false;
-  //       return hadLiked
-  //     }
-  //     sauce.usersLiked.includes(req.auth.userId)? removeLike():removeDislike();
-  //   }
-  //   updateLikesOrDislikes(hadLiked)
-
-  // })
-  // .catch((error) => {
-  //   res.status(400).json({ error });
-  // })
 }
 
 exports.deleteSauce = (req, res, next) => {
