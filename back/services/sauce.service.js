@@ -1,7 +1,7 @@
 const Sauce = require('../models/Sauce')
 
 const getSauces = async () => {
-    return Sauce.find()
+    return Sauce.find().limit(20).sort({usersLiked : -1}) // limitation on api results (20), results are sorted by number of likes (descending order)
 }
 
 const getSauce = async (sauceId) => {

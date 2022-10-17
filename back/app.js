@@ -2,6 +2,7 @@ const express = require('express')
 const mongoose = require('mongoose')
 const path = require('path')
 const helmet = require('helmet')
+const { requestLimiter } = require('./middleware/rateLimiter')
 require('dotenv').config()
 
 const sauceRoutes = require('./routes/sauce')
@@ -34,8 +35,8 @@ app.use((req, res, next) => {
     next()
 })
 
-app.use('/api/sauces', sauceRoutes)
-app.use('/api/auth', userRoutes)
+app.use('/api/sauces', requestLimiter, sauceRoutes)
+app.use('/api/auth', requestLimiter, userRoutes)
 app.use('/images', express.static(path.join(__dirname, 'images')))
 
 module.exports = app
