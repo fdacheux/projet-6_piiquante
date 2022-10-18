@@ -5,8 +5,8 @@ const helmet = require('helmet')
 const { requestLimiter } = require('./middleware/rateLimiter')
 require('dotenv').config()
 
-const sauceRoutes = require('./routes/sauce')
-const userRoutes = require('./routes/user')
+const sauceRoutes = require('./routes/sauce.routes')
+const userRoutes = require('./routes/user.routes')
 
 const uri = process.env.MONGO_URI
 mongoose
@@ -16,12 +16,14 @@ mongoose
 
 const app = express()
 
-app.use(express.json())
+app.use(express.json({ limit: '50mb' }))
+app.use(express.urlencoded({ limit: '50mb', extended: true }))
+
 app.use(helmet())
-app.disable('x-powered-by')
+
 
 // Middlewear : CORS (gives access control)
-app.use((req, res, next) => {
+app.use((_req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*')
     res.setHeader(
         'Access-Control-Allow-Headers',
@@ -31,7 +33,7 @@ app.use((req, res, next) => {
         'Access-Control-Allow-Methods',
         'GET, POST, PUT, DELETE, PATCH, OPTIONS'
     )
-    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin') //because of helmet, is there another way ?
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin')
     next()
 })
 

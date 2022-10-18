@@ -1,9 +1,9 @@
 const User = require('../models/User')
 
-const save = async (email, hash) => {
+const save = async (email, password) => {
     const user = new User({
         email,
-        password: hash,
+        password,
     })
 
     return user.save()

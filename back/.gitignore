@@ -3,3 +3,4 @@ images
 /prettier.config
 /.prettierignore
 /prettier.config.js
+/.env
